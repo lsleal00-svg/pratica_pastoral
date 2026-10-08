@@ -14,6 +14,11 @@ function aviso(onde, texto, tipo = 'erro') {
   $('#msg-' + onde).innerHTML = `<div class="aviso aviso-${tipo}">${esc(texto)}</div>`;
 }
 
+// Marca o aparelho em que um estudante entrou: a página do ancião se recusa a confirmar nele
+function marcarAparelho(tipo) {
+  try { if (tipo === 'aluno' || tipo === 'monitor') localStorage.setItem('pp_aparelho_aluno', '1'); } catch {}
+}
+
 $$('[data-ir]').forEach((b) => (b.onclick = () => ir(b.dataset.ir)));
 
 // Já está logado? vai direto para o app
@@ -38,7 +43,8 @@ async function entrarComSenha(email, senha) {
     throw new Error(m);
   }
   const { data: u } = await sb.auth.getUser();
-  const { data: p } = await sb.from('perfis').select('ativo').eq('id', u.user.id).maybeSingle();
+  const { data: p } = await sb.from('perfis').select('ativo, tipo').eq('id', u.user.id).maybeSingle();
+  marcarAparelho(p?.tipo);
   if (!p || !p.ativo) {
     await sb.auth.signOut();
     throw new Error('Seu cadastro não está ativo. Procure o administrador.');

@@ -31,6 +31,7 @@ async function iniciar() {
     await sb.auth.signOut();
     return location.replace('index.html');
   }
+  try { if (['aluno', 'monitor'].includes(p.tipo)) localStorage.setItem('pp_aparelho_aluno', '1'); } catch {}
   try { await carregarBase(); } catch (e) { erro(e); }
   montarTopo();
   montarAbas();
@@ -150,9 +151,14 @@ async function montarNotificacoes(p) {
   try {
     const lista = ok(await sb.from('notificacoes').select('*').order('criado_em', { ascending: false }).limit(50)) || [];
     $('.notif-lista', p).innerHTML = lista.length
-      ? lista.map((n) => `<div class="notif ${n.lida ? '' : 'nova'}"><b>${esc(n.titulo)}</b>${n.texto ? `<p>${esc(n.texto)}</p>` : ''}<small>${dataHoraBR(n.criado_em)}</small></div>`).join('')
+      ? lista.map((n) => `<div class="notif ${n.lida ? '' : 'nova'}" ${n.link ? `data-link="${esc(n.link)}" style="cursor:pointer"` : ''}><b>${esc(n.titulo)}</b>${n.texto ? `<p>${esc(n.texto)}</p>` : ''}<small>${dataHoraBR(n.criado_em)}${n.link ? ' · toque para abrir' : ''}</small></div>`).join('')
       : '<div class="vazio">Nenhuma notificação.</div>';
   } catch (e) { $('.notif-lista', p).innerHTML = `<div class="vazio">${esc(e.message)}</div>`; }
+  $$('.notif[data-link]', p).forEach((n) => (n.onclick = () => {
+    p.remove();
+    const alvo = n.dataset.link.replace(/^#/, '');
+    if (location.hash.replace(/^#/, '') === alvo) abrir(alvo.split('/')[0]); else location.hash = alvo;
+  }));
   $('.b-lidas', p).onclick = async () => {
     try { ok(await sb.rpc('marcar_lidas')); $$('.notif.nova', p).forEach((n) => n.classList.remove('nova')); atualizarSino(); } catch (e) { erro(e); }
   };

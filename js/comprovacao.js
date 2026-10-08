@@ -4,16 +4,12 @@ import { esc, html, modal, toast, linkWhats, dataHoraBR } from './ui.js';
 import { filaAdicionar, filaListar, filaRemover } from './cache.js';
 import { estado } from './dados.js';
 
-export function linkAnciao(token) {
-  return `${location.origin}${location.pathname.replace(/[^/]*$/, '')}anciao.html?t=${token}`;
-}
-
-export function mensagemAnciao({ anciao, igreja, pratica, itens, token }) {
+// Recado curto (sem link) para avisar o ancião de que há um pedido no app dele
+export function mensagemAnciao({ anciao, igreja, pratica, itens }) {
   const nome = estado.perfil?.nome || '';
   return `Olá, ${anciao}! Aqui é ${nome}, estudante de Teologia da FAAMA em prática pastoral na ${igreja}.\n\n`
-    + `Peço, por gentileza, que confirme os requisitos que cumpri em ${pratica.nome}:\n`
-    + itens.map((i) => `• ${i}`).join('\n')
-    + `\n\nPara confirmar ou pedir revisão, toque no link:\n${linkAnciao(token)}\n\nPrazo: até ${dataHoraBR(pratica.fim)}. Obrigado!`;
+    + `Enviei pelo app de Prática Pastoral ${itens.length} requisito(s) de ${pratica.nome} para a sua aprovação. `
+    + `Quando puder, abra o app do ancião para aprovar ou pedir correção. O prazo é até ${dataHoraBR(pratica.fim)}. Obrigado!`;
 }
 
 async function chamarEnvio(item) {
@@ -41,20 +37,17 @@ export async function enviar(pratica, requisitos) {
   return { guardado: true, item };
 }
 
-// Janela com o botão do WhatsApp (precisa de um toque da pessoa para abrir)
+// Confirmação do envio, com um recado opcional ao ancião pelo WhatsApp (sem link)
 export async function oferecerWhatsApp(resposta, pratica, enunciados) {
-  const texto = mensagemAnciao({ anciao: resposta.anciao_nome, igreja: resposta.igreja, pratica, itens: enunciados, token: resposta.token });
+  const texto = mensagemAnciao({ anciao: resposta.anciao_nome, igreja: resposta.igreja, pratica, itens: enunciados });
+  const prazo = resposta.prazo || pratica.fim;
   const corpo = html(`<div>
-    <div class="aviso aviso-ok">Requisitos registrados. Agora envie o pedido de comprovação para <b>${esc(resposta.anciao_nome)}</b>.</div>
-    <p class="dica">O WhatsApp vai abrir com a mensagem pronta e o link. É só tocar em enviar.</p>
+    <div class="aviso aviso-ok"><b>Enviado!</b> O pedido já aparece no app de <b>${esc(resposta.anciao_nome)}</b>, que tem até ${dataHoraBR(prazo)} para aprovar ou pedir correção.</div>
+    <p class="dica">Se quiser, avise o ancião por WhatsApp. A mensagem não leva link: ele aprova pelo app dele.</p>
     <div class="linha-botoes">
-      <a class="btn btn-whats" target="_blank" rel="noopener" href="${esc(linkWhats(resposta.anciao_tel, texto))}">Abrir WhatsApp do ancião</a>
-      <button class="btn btn-sec b-copiar">Copiar mensagem</button>
+      <a class="btn btn-whats" target="_blank" rel="noopener" href="${esc(linkWhats(resposta.anciao_tel, texto))}">Avisar o ancião no WhatsApp</a>
     </div></div>`);
-  corpo.querySelector('.b-copiar').onclick = async () => {
-    try { await navigator.clipboard.writeText(texto); toast('Mensagem copiada.'); } catch { toast('Não foi possível copiar.', 'erro'); }
-  };
-  await modal({ titulo: 'Enviar ao ancião', corpo, acoes: [{ rotulo: 'Fechar' }] });
+  await modal({ titulo: 'Pedido enviado', corpo, acoes: [{ rotulo: 'Fechar' }] });
 }
 
 // Tenta mandar o que ficou guardado no aparelho. Devolve quantos foram enviados.

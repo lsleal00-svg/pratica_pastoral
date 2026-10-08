@@ -48,8 +48,9 @@ export async function cumprimentosDoAluno(alunoId) {
 export const CUMPRIDO = ['confirmado', 'aprovado_prof'];
 export const ROTULO_STATUS = {
   enviado: 'Aguardando o ancião',
-  confirmado: 'Confirmado pelo ancião',
-  revisar: 'Revisar e reenviar',
+  confirmado: 'Aprovado pelo ancião',
+  revisar: 'Correção pedida',
+  vencido: 'Prazo do ancião vencido',
   aprovado_prof: 'Aprovado pelo professor',
   reprovado_prof: 'Reprovado pelo professor',
   nao_enviado: 'Não enviado',
