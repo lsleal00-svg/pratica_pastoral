@@ -49,6 +49,8 @@ export async function api(acao, dados = {}) {
 export function ok({ data, error, count }) {
   if (error) {
     const m = error.message || '';
+    const pref = m.match(/^(HISTORICO|PRAZO|REPETIDO|LIMITE|JA):\s*/);
+    if (pref) throw new Error(m.slice(pref[0].length));
     if (m.includes('HISTORICO')) throw new Error(m.replace(/^.*HISTORICO:\s*/, ''));
     if (m.includes('duplicate key')) throw new Error('Já existe um registro com esses dados.');
     if (m.includes('row-level security')) throw new Error('Você não tem permissão para esta ação.');

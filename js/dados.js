@@ -1,6 +1,7 @@
 // Estado compartilhado e cargas comuns
 import { sb, ok } from './supa.js';
 import { diaLocal } from './ui.js';
+import { comCopia } from './cache.js';
 
 export const estado = {
   perfil: null,
@@ -11,27 +12,64 @@ export const estado = {
   semestreAtualId: null,
 };
 
+// Usa a sessão guardada no aparelho (funciona sem internet)
 export async function carregarPerfil() {
-  const { data: u } = await sb.auth.getUser();
-  if (!u?.user) return null;
-  const p = ok(await sb.from('perfis').select('*').eq('id', u.user.id).maybeSingle());
+  const { data } = await sb.auth.getSession();
+  const id = data?.session?.user?.id;
+  if (!id) return null;
+  const p = await comCopia('perfil:' + id, async () => ok(await sb.from('perfis').select('*').eq('id', id).maybeSingle()));
   estado.perfil = p;
   return p;
 }
 
 export async function carregarBase() {
-  const [t, s, p, e] = await Promise.all([
-    sb.from('turmas').select('*').order('nome'),
-    sb.from('semestres').select('*').order('inicio', { ascending: false }),
-    sb.from('praticas').select('*').order('inicio'),
-    sb.from('eventos').select('*').order('data'),
-  ]);
-  estado.turmas = ok(t) || [];
-  estado.semestres = ok(s) || [];
-  estado.praticas = ok(p) || [];
-  estado.eventos = ok(e) || [];
+  const b = await comCopia('base:' + (estado.perfil?.id || ''), async () => {
+    const [t, s, p, e] = await Promise.all([
+      sb.from('turmas').select('*').order('nome'),
+      sb.from('semestres').select('*').order('inicio', { ascending: false }),
+      sb.from('praticas').select('*').order('inicio'),
+      sb.from('eventos').select('*').order('data'),
+    ]);
+    return { turmas: ok(t) || [], semestres: ok(s) || [], praticas: ok(p) || [], eventos: ok(e) || [] };
+  });
+  Object.assign(estado, b);
   estado.semestreAtualId = calcularSemestreAtual();
   return estado;
+}
+
+// Cumprimentos de um aluno (com cópia no aparelho)
+export async function cumprimentosDoAluno(alunoId) {
+  return comCopia('cumpr:' + alunoId, async () =>
+    ok(await sb.from('cumprimentos').select('*').eq('aluno_id', alunoId)) || []);
+}
+
+// ------------------------------------------------------------ progresso
+
+export const CUMPRIDO = ['confirmado', 'aprovado_prof'];
+export const ROTULO_STATUS = {
+  enviado: 'Aguardando o ancião',
+  confirmado: 'Confirmado pelo ancião',
+  revisar: 'Revisar e reenviar',
+  aprovado_prof: 'Aprovado pelo professor',
+  reprovado_prof: 'Reprovado pelo professor',
+  nao_enviado: 'Não enviado',
+};
+
+// Quantas vezes o requisito é exigido no semestre
+export function exigido(req, nBlocos) {
+  return req.quantidade ?? nBlocos;
+}
+
+// Progresso de uma lista de requisitos: { exigido, cumprido, pct }
+export function progresso(requisitos, praticasSemestre, cumprimentos) {
+  let ex = 0, cu = 0;
+  for (const r of requisitos) {
+    const e = exigido(r, praticasSemestre.length);
+    const feitos = cumprimentos.filter((c) => c.requisito_id === r.id && CUMPRIDO.includes(c.status)
+      && praticasSemestre.some((p) => p.id === c.pratica_id)).length;
+    ex += e; cu += Math.min(feitos, e);
+  }
+  return { exigido: ex, cumprido: cu, pct: ex ? Math.round((cu / ex) * 100) : 0 };
 }
 
 export function calcularSemestreAtual() {
@@ -60,6 +98,9 @@ export function situacaoPratica(p, agora = Date.now()) {
 // Disciplinas de uma turma num semestre: [{disciplina, requisitos}]
 export async function disciplinasDaTurma(turmaId, semestreId) {
   if (!turmaId || !semestreId) return [];
+  return comCopia(`disc:${turmaId}:${semestreId}`, () => buscarDisciplinasDaTurma(turmaId, semestreId));
+}
+async function buscarDisciplinasDaTurma(turmaId, semestreId) {
   const v = ok(await sb.from('disciplina_turma').select('disciplina_id, disciplinas(*)')
     .eq('turma_id', turmaId).eq('semestre_id', semestreId)) || [];
   const discs = v.map((x) => x.disciplinas).filter((d) => d && !d.arquivada);

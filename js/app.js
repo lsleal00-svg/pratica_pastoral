@@ -4,10 +4,10 @@ import { estado, carregarPerfil, carregarBase, turmaNome } from './dados.js';
 
 // Abas por perfil (a primeira é a tela inicial)
 const ABAS = {
-  aluno:     [['igreja', 'Igreja'], ['calendario', 'Calendário']],
+  aluno:     [['igreja', 'Igreja'], ['calendario', 'Calendário'], ['graficos', 'Gráficos']],
   monitor:   [['igreja', 'Minha igreja'], ['calendario', 'Calendário'], ['igrejas', 'Igrejas'], ['disciplinas', 'Disciplinas e requisitos'], ['graficos', 'Gráficos']],
-  professor: [['graficos', 'Gráficos'], ['calendario', 'Calendário'], ['igrejas', 'Igrejas'], ['disciplinas', 'Disciplinas e requisitos'], ['painel', 'Painel do administrador']],
-  admin:     [['graficos', 'Gráficos'], ['calendario', 'Calendário'], ['igrejas', 'Igrejas'], ['disciplinas', 'Disciplinas e requisitos'], ['painel', 'Painel do administrador']],
+  professor: [['graficos', 'Gráficos'], ['acompanhamento', 'Acompanhamento'], ['calendario', 'Calendário'], ['igrejas', 'Igrejas'], ['disciplinas', 'Disciplinas e requisitos'], ['painel', 'Painel do administrador']],
+  admin:     [['graficos', 'Gráficos'], ['acompanhamento', 'Acompanhamento'], ['calendario', 'Calendário'], ['igrejas', 'Igrejas'], ['disciplinas', 'Disciplinas e requisitos'], ['painel', 'Painel do administrador']],
 };
 
 const VIEWS = {
@@ -17,6 +17,7 @@ const VIEWS = {
   disciplinas: () => import('./views/disciplinas.js'),
   painel: () => import('./views/painel.js'),
   graficos: () => import('./views/graficos.js'),
+  acompanhamento: () => import('./views/acompanhamento.js'),
 };
 
 let abaAtual = null;
@@ -37,6 +38,12 @@ async function iniciar() {
   abrirDoHash();
   atualizarSino();
   setInterval(atualizarSino, 60_000);
+  // internet voltou: registra o que ficou guardado e redesenha a tela da igreja
+  window.addEventListener('online', async () => {
+    const { sincronizarFila } = await import('./comprovacao.js');
+    const n = await sincronizarFila();
+    if (n) { toast(`${n} envio(s) guardado(s) foram registrados. Mande o link ao ancião.`); if (abaAtual === 'igreja') abrir('igreja'); }
+  });
 }
 
 function montarAbas() {
@@ -131,6 +138,8 @@ function montarFicha(p) {
     } catch (err) { erro(err); }
   };
   $('.ficha-sair', p).onclick = async () => {
+    const { limparTudo } = await import('./cache.js');
+    await limparTudo();
     await sb.auth.signOut();
     location.replace('index.html');
   };
