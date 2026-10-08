@@ -5,23 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b2e6b">
   <meta name="robots" content="noindex">
-  <title>Comprovação de prática pastoral</title>
+  <title>Prática Pastoral — Ancião</title>
+  <link rel="manifest" href="manifest-anciao.webmanifest">
   <link rel="icon" href="assets/icone-192.png">
+  <link rel="apple-touch-icon" href="assets/icone-192.png">
   <link rel="stylesheet" href="css/estilo.css">
   <style>
-    .pag-anciao { max-width: 560px; margin: 0 auto; padding: 18px 16px 50px; }
-    .itens-anciao { list-style: none; padding: 0; margin: 10px 0 0; }
-    .itens-anciao li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--borda); }
+    .pag-anciao { max-width: 640px; margin: 0 auto; padding: 16px 16px 60px; }
+    .aluno-linha { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 4px; background: none; border: 0; border-bottom: 1px solid var(--borda); cursor: pointer; text-align: left; }
+    .aluno-linha .nome { flex: 1; min-width: 0; }
+    .aluno-linha .nome b { display: block; }
+    .aluno-linha .nome small { color: var(--suave); }
+    .aluno-linha .seta { color: var(--suave); transition: transform .2s; }
+    .aluno-linha.aberto .seta { transform: rotate(90deg); }
+    .aluno-detalhe { padding: 4px 0 14px 4px; border-bottom: 1px solid var(--borda); }
+    .envio { border: 1px solid var(--borda); border-radius: 10px; padding: 12px; margin-top: 10px; background: #fff; }
+    .envio h4 { font-size: 14px; margin: 0 0 2px; color: var(--marinho); }
+    .itens-anciao { list-style: none; padding: 0; margin: 8px 0; }
+    .itens-anciao li { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--borda); font-size: 14px; }
     .itens-anciao li:last-child { border-bottom: 0; }
     .itens-anciao .ok { color: var(--verde); font-weight: 800; }
-    .botoes-anciao { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-    .botoes-anciao .btn { min-height: 52px; font-size: 16px; }
+    .botoes-anciao { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .botoes-anciao .btn { min-height: 48px; white-space: normal; padding: 8px 10px; }
     .btn-confirmar { background: var(--verde); }
     .btn-confirmar:hover { background: #17834a; }
   </style>
 </head>
 <body>
-  <header class="topo"><div class="titulo">Prática Pastoral<small>Comprovação · Teologia FAAMA</small></div></header>
+  <header class="topo">
+    <div class="titulo">Prática Pastoral<small id="sub">Área do ancião</small></div>
+    <button class="topo-btn oculto" id="b-instalar" title="Instalar no celular" aria-label="Instalar no celular">⬇</button>
+    <button class="topo-btn oculto" id="b-sino" title="Notificações" aria-label="Notificações">🔔<span class="bolha oculto" id="n-sino">0</span></button>
+    <button class="topo-btn oculto" id="b-sair" title="Sair" aria-label="Sair">↪</button>
+  </header>
   <main class="pag-anciao" id="conteudo"><div class="carregando">Carregando…</div></main>
   <script type="module" src="js/anciao.js"></script>
 </body>

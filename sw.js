@@ -1,12 +1,13 @@
 // Service worker: rede primeiro, cópia guardada quando estiver sem internet.
 // Os dados do Supabase nunca passam pelo cache.
-const CACHE = 'pp-v1.1.0';
+const CACHE = 'pp-v1.3.0';
 const BASE = [
   './',
   'index.html',
   'app.html',
   'anciao.html',
   'manifest.webmanifest',
+  'manifest-anciao.webmanifest',
   'assets/icone-192.png',
   'css/estilo.css',
   'js/anciao.js',
