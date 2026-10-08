@@ -1,1 +1,0 @@
-# pratica_pastoral
