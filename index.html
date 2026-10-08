@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b2e6b">
+  <title>Prática Pastoral — Entrar</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icone-192.png">
+  <link rel="apple-touch-icon" href="assets/icone-192.png">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <main class="tela-login">
+    <div class="caixa-login">
+      <div class="marca">
+        <img src="assets/icone-192.png" alt="">
+        <div><h1>Prática Pastoral</h1><p>Teologia · FAAMA</p></div>
+      </div>
+
+      <!-- Entrar -->
+      <form id="f-entrar" autocomplete="on">
+        <h2>Entrar</h2>
+        <div id="msg-entrar"></div>
+        <label class="campo"><span>E-mail</span>
+          <input name="email" type="email" required autocomplete="username" inputmode="email"></label>
+        <label class="campo"><span>Senha ou código de 6 dígitos</span>
+          <input name="senha" type="password" required autocomplete="current-password"></label>
+        <label class="check" style="margin-bottom:14px"><input type="checkbox" name="manter" checked> Manter-me conectado</label>
+        <button class="btn btn-bloco" type="submit">Entrar</button>
+        <div class="links-login">
+          <button type="button" class="link-btn" data-ir="f-esqueci">Redefinir senha</button>
+          <button type="button" class="link-btn" data-ir="f-primeiro">Primeiro acesso</button>
+        </div>
+      </form>
+
+      <!-- Redefinir senha (pedir código) -->
+      <form id="f-esqueci" class="oculto">
+        <h2>Redefinir senha</h2>
+        <p class="dica">Informe o e-mail cadastrado. Se ele estiver no sistema, você receberá um código de 6 dígitos válido por 15 minutos.</p>
+        <div id="msg-esqueci"></div>
+        <label class="campo"><span>E-mail cadastrado</span><input name="email" type="email" required inputmode="email"></label>
+        <button class="btn btn-bloco" type="submit">Enviar código</button>
+        <div class="links-login"><button type="button" class="link-btn" data-ir="f-entrar">← Voltar</button></div>
+      </form>
+
+      <!-- Nova senha (depois do código) -->
+      <form id="f-nova" class="oculto">
+        <h2>Criar nova senha</h2>
+        <p class="dica">Código aceito. Crie agora a sua senha (mínimo de 8 caracteres).</p>
+        <div id="msg-nova"></div>
+        <label class="campo"><span>Nova senha</span><input name="senha" type="password" minlength="8" required autocomplete="new-password"></label>
+        <label class="campo"><span>Confirmar nova senha</span><input name="senha2" type="password" minlength="8" required autocomplete="new-password"></label>
+        <button class="btn btn-bloco" type="submit">Salvar e entrar</button>
+        <div class="links-login"><button type="button" class="link-btn" data-ir="f-entrar">← Cancelar</button></div>
+      </form>
+
+      <!-- Primeiro acesso -->
+      <form id="f-primeiro" class="oculto">
+        <h2>Primeiro acesso</h2>
+        <p class="dica">Preencha seus dados. Um administrador vai analisar o pedido e enviar seu código de acesso por e-mail ou WhatsApp.</p>
+        <div id="msg-primeiro"></div>
+        <label class="campo"><span>Nome completo <b class="obr">*</b></span><input name="nome" required autocomplete="name"></label>
+        <div class="grade-2">
+          <label class="campo"><span>Data de nascimento <b class="obr">*</b></span><input name="nascimento" type="date" required></label>
+          <label class="campo"><span>Turma <b class="obr">*</b></span><select name="turma_id" required><option value="">Carregando…</option></select></label>
+          <label class="campo"><span>RA <b class="obr">*</b></span><input name="ra" inputmode="numeric" pattern="[0-9]+" required><small>Somente números.</small></label>
+          <label class="campo"><span>CPF</span><input name="cpf" inputmode="numeric"><small>Opcional.</small></label>
+        </div>
+        <label class="campo"><span>E-mail <b class="obr">*</b></span><input name="email" type="email" required inputmode="email"></label>
+        <label class="campo"><span>WhatsApp com DDD <b class="obr">*</b></span><input name="telefone" type="tel" required inputmode="tel" placeholder="(91) 90000-0000"></label>
+        <button class="btn btn-bloco" type="submit">Solicitar acesso</button>
+        <div class="links-login"><button type="button" class="link-btn" data-ir="f-entrar">← Voltar</button></div>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>
