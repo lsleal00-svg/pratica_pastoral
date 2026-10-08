@@ -34,7 +34,7 @@ async function entrarComSenha(email, senha) {
     const m = error.message || '';
     if (/banned/i.test(m)) throw new Error('Seu acesso está inativo. Procure o administrador.');
     if (/invalid login/i.test(m)) throw new Error('E-mail ou senha incorretos.');
-    if (/fetch/i.test(m)) throw new Error('Sem conexão com o servidor. Verifique sua internet.');
+    if (/fetch|network/i.test(m)) throw new Error('Não foi possível falar com o Supabase (login). Detalhe: ' + m);
     throw new Error(m);
   }
   const { data: u } = await sb.auth.getUser();
@@ -52,13 +52,16 @@ $('#f-entrar').onsubmit = (e) => {
   definirManter(d.manter);
   ocupado(e.submitter, async () => {
     try {
-      if (/^\d{6}$/.test(d.senha)) {
-        await api('validar_codigo', { email: d.email, codigo: d.senha });
-        pendente = { email: d.email, codigo: d.senha };
-        ir('f-nova');
+      // Tenta primeiro como senha; se não servir e tiver 6 números, tenta como código
+      try {
+        await entrarComSenha(d.email, d.senha);
         return;
+      } catch (errSenha) {
+        if (!/^\d{6}$/.test(d.senha) || !/incorretos/.test(errSenha.message)) throw errSenha;
       }
-      await entrarComSenha(d.email, d.senha);
+      await api('validar_codigo', { email: d.email, codigo: d.senha });
+      pendente = { email: d.email, codigo: d.senha };
+      ir('f-nova');
     } catch (err) { aviso('entrar', err.message); }
   });
 };

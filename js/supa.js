@@ -36,7 +36,8 @@ export async function api(acao, dados = {}) {
       method: 'POST', headers, body: JSON.stringify({ acao, dados }),
     });
   } catch {
-    throw new Error('Sem conexão com o servidor. Verifique sua internet.');
+    if (!navigator.onLine) throw new Error('Sem internet. Verifique sua conexão.');
+    throw new Error('Não foi possível falar com a função do servidor (api). Confira se a Edge Function "api" foi publicada com esse nome e com "Verify JWT" desligado.');
   }
   let corpo = {};
   try { corpo = await r.json(); } catch {}
